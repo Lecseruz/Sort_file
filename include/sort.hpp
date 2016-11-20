@@ -31,7 +31,7 @@ public:
     void sort();
 private:
 
-    auto remove_create_fail()-> void;
+    auto remove_create_file()-> void;
     auto generate()-> void;
     std::vector<std::string> arr_name_file;
     std::string name_file;
@@ -97,10 +97,10 @@ void File_sort::sort() {
             other.push(tmp1);
         }
     }
-    remove_create_fail();
+    remove_create_file();
 }
 
-auto File_sort::remove_create_fail()-> void {
+auto File_sort::remove_create_file()-> void {
     for (int i = 0; i < arr_name_file.size(); ++i) {
         auto a = arr_name_file[i].c_str();
         std::remove(a);
