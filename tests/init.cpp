@@ -1,4 +1,4 @@
-#include <sort.cpp>
+#include <sort.hpp>
 #include <catch.hpp>
 #include <string>
 #include <iostream>
