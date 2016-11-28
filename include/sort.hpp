@@ -111,7 +111,7 @@ auto File_sort::generate() -> void {
 
     while (file >> data) {
         size += data.length();
-        if (buffer_size <= size) {
+        if (buffer_size - data.length() <= size) {
             arr_name_file.push_back(name_file);
             std::sort(arr.begin(), arr.end());
             make_file(name_file, arr);
