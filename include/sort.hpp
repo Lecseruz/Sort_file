@@ -107,19 +107,19 @@ auto File_sort::generate() -> void {
     unsigned long size = 0;
     std::string name_file = "0";
     Data data;
-    std::vector<Data> arr;
+    std::vector<Data> arr(buffer_size / 24);
 
     while (file >> data) {
-        size += data.length();
+        arr.push_back(data);
+        size++;
         if (buffer_size - data.length() <= size) {
             arr_name_file.push_back(name_file);
             std::sort(arr.begin(), arr.end());
             make_file(name_file, arr);
             name_file = arr_name_file.size();
-            size = (unsigned long) data.length();
+            size = 0;
             arr.clear();
         }
-        arr.push_back(data);
     }
     if (arr.size() > 0) {
         std::sort(arr.begin(), arr.end());
