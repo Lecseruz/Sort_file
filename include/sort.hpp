@@ -70,7 +70,7 @@ public:
 private:
     auto sort() -> void;
 
-    auto make_file(std::string, std::vector<Data>) -> void;
+    auto make_file(std::string, std::vector<Data>&) -> void;
 
     auto remove_create_files() -> void;
 
@@ -85,12 +85,13 @@ private:
 File_sort::File_sort(std::string str1, std::string str2, int size)
         : name_input_file(str1),
           name_output_file(str2),
-          buffer_size(size * 1024 * 1024) {
+          buffer_size(size * 1024 * 1024)
+{
     generate();
     sort();
 }
 
-auto File_sort::make_file(std::string name_file, std::vector<Data> arr) -> void {
+auto File_sort::make_file(std::string name_file, std::vector<Data> &arr) -> void {
     std::ofstream file(name_file);
     if (!file) {
         std::logic_error("Error: file not open");
@@ -108,11 +109,12 @@ auto File_sort::generate() -> void {
     std::string name_file = "0";
     Data data;
     std::vector<Data> arr(buffer_size / 24);
+    arr.clear();
 
     while (file >> data) {
         arr.push_back(data);
-        size++;
-        if (buffer_size - data.length() <= size) {
+        ++size;
+        if (buffer_size / 24 <= size) {
             arr_name_file.push_back(name_file);
             std::sort(arr.begin(), arr.end());
             make_file(name_file, arr);
