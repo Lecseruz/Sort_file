@@ -11,7 +11,6 @@
 
 SCENARIO("8mb", "[8mb]")
 {
-  File_sort other("8mb", "out_8", 1);
   setlocale(LC_ALL, "Russian");
   sorting("8mb","8out_8",1);
   bool x = true;
