@@ -1,3 +1,5 @@
+// ext_sort_name.cpp: определяет точку входа для консольного приложения.
+//
 
 #include <iostream>
 #include <fstream>
@@ -5,7 +7,7 @@
 #include <vector>
 #include <algorithm>
 #include <queue>
-#include <deque>
+//#include <deque>
 #include <chrono>
 #include <ctime>
 
@@ -76,16 +78,17 @@ auto sorting(const std::string input_adress, const std::string output_adress, co
 	{
 		line st;
 		std::ofstream buff(std::to_string(num_buff + 1) + ".txt", std::ios::binary);
-		std::deque<line> deque_;
+		//std::deque<line> deque_;
+		std::vector<line> vector_;
 		for (unsigned int size = 0; (size + 50) < memory * 1024 * 1024; size += 50)
 		{
-			if (!fin.eof() && (fin >> st) && (st != ""))  deque_.push_back(st);
+			if (!fin.eof() && (fin >> st) && (st != ""))  vector_.push_back(st);
 			size += st.size();
 			// 			std::getline(fin, s);
 				//	deque_.push_back(s);
 		}
-		std::sort(deque_.begin(), deque_.end());
-		for (auto i : deque_)
+		std::sort(vector_.begin(), vector_.end());
+		for (auto i : vector_)
 		{
 			if (i != "") buff << i << std::endl;
 		}
