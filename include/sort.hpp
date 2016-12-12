@@ -1,163 +1,145 @@
-#ifndef sort_hpp
-#define sort_hpp
-#pragma once
 
 #include <iostream>
-#include <cstring>
 #include <fstream>
+#include <string>
 #include <vector>
 #include <algorithm>
-#include <functional>
 #include <queue>
-#include <string>
+#include <deque>
+#include <chrono>
+#include <ctime>
 
 
-struct Data{
-    std::string surname;
-    std::string name;
-    unsigned int year;
-    auto length() -> unsigned long ;
+
+struct line
+{
+	std::string name;
+	std::string surname;
+	short year;
+	size_t size() const
+	{
+		size_t sz = sizeof(std::string);
+		return (sz + name.size() + sz + surname.size() + sizeof(year));
+	}
 };
 
-auto Data::length() -> unsigned long {
-    return surname.size() + name.size() + sizeof(year);
+bool operator < (const line& line1, const line& line2)
+{
+	return (line1.name < line2.name);
 }
 
+bool operator >(const line& line1, const line& line2)
+{
+	return (line1.name > line2.name);
+}
 
-struct A {
-    std::ifstream *ptr;
-    Data data;
+std::ostream & operator<<(std::ostream & output, line const & str)
+{
+	output << str.surname << " " << str.name << " " << str.year;
+	return output;
+}
+
+std::istream & operator >> (std::istream & input, line & str)
+{
+	input >> str.surname >> str.name >> str.year;
+	return input;
+}
+
+bool operator != (const line& line_, const std::string& string_)
+{
+	return (line_.surname != string_);
+}
+
+struct inp
+{
+	line st;
+	std::ifstream *file;
+	inp(const line& st_, std::ifstream* file_) : st(st_), file(file_) {}
 };
 
-inline auto operator>(const Data &tmp1, const Data &tmp2)->bool {
-    return tmp1.name > tmp2.name;
-}
 
-inline auto operator<(const Data &tmp1, const Data &tmp2)->bool {
-    return tmp1.name < tmp2.name;
-}
-
-inline bool operator<(const A &s1, const A &s2) {
-    return s1.data > s2.data;
-}
-
-std::ostream & operator<<(std::ostream & output, Data const & str)
+bool operator < (const inp& inp_1, const inp& inp_2)
 {
-    output << str.surname << " " << str.name << " " << str.year;
-    return output;
+	return (inp_1.st > inp_2.st);
 }
 
-std::istream & operator>>(std::istream & input, Data & str)
+
+auto sorting(const std::string input_adress, const std::string output_adress, const unsigned int memory)
 {
-    input >> str.surname >> str.name >> str.year;
-    return input;
+	//std::ifstream fin("C:/Users/Dell/Documents/Visual Studio 2015/Projects/extended_sort/fix/8.txt", std::ios::binary);
+	std::ifstream fin(input_adress, std::ios::binary);
+	if (fin.is_open() == false) throw ("Cant open ur file");
+	//std::ofstream fout("C:/Users/Dell/Documents/Visual Studio 2015/Projects/extended_sort/fix/8out.txt", std::ios::binary);
+	std::ofstream fout(output_adress, std::ios::binary);
+	size_t num_buff = 0;
+	while (fin.eof() == false)
+	{
+		line st;
+		std::ofstream buff(std::to_string(num_buff + 1) + ".txt", std::ios::binary);
+		std::deque<line> deque_;
+		for (unsigned int size = 0; (size + 50) < memory * 1024 * 1024; size += 50)
+		{
+			if (!fin.eof() && (fin >> st) && (st != ""))  deque_.push_back(st);
+			size += st.size();
+			// 			std::getline(fin, s);
+				//	deque_.push_back(s);
+		}
+		std::sort(deque_.begin(), deque_.end());
+		for (auto i : deque_)
+		{
+			if (i != "") buff << i << std::endl;
+		}
+		num_buff++;
+		buff.close();
+	}
+	fin.close();
+	std::priority_queue<inp> PriQue;
+	for (size_t i = 0; i < num_buff; ++i)
+	{
+		std::ifstream* f_ = new std::ifstream(std::to_string(i + 1) + ".txt", std::ios::binary);
+		line str;
+		*f_ >> str;
+		inp inp_(str, f_);
+		PriQue.push(inp_);
+	}
+	while (PriQue.empty() == false)
+	{
+		inp inp_ = PriQue.top();
+		PriQue.pop();
+		if (inp_.st != "")
+		{
+			fout << inp_.st << std::endl;
+		}
+		if (!(*inp_.file).eof() && (*inp_.file >> inp_.st))
+		{
+			PriQue.push(inp_);
+		}
+		else
+		{
+			(*(inp_.file)).close();
+		}
+	}
+	for (size_t i = 0; i < num_buff; ++i)
+	{
+		remove((std::to_string(i + 1) + ".txt").data());
+	}
+	fout.close();
 }
 
-class File_sort {
-public:
-    File_sort(std::string, std::string, int buffer_size);
-
-    File_sort(File_sort const &) = delete;
-
-    auto operator=(File_sort const &) -> File_sort & = delete;
-
-    File_sort(File_sort &&) = delete;
-
-    auto operator=(File_sort &&) -> File_sort & = delete;
-
-
-
-private:
-    auto sort() -> void;
-
-    auto make_file(std::string, std::vector<Data>&) -> void;
-
-    auto remove_create_files() -> void;
-
-    auto generate() -> void;
-
-    std::vector<std::string> arr_name_file;
-    std::string name_input_file;
-    std::string name_output_file;
-    long long buffer_size;
-};
-
-File_sort::File_sort(std::string str1, std::string str2, int size)
-        : name_input_file(str1),
-          name_output_file(str2),
-          buffer_size(size * 1024 * 1024)
-{
-    generate();
-    sort();
+/*void main(){
+std::string in, out;
+unsigned long int memory_size;
+std::cout << "input path: "; std::cin >> in;
+std::cout << "output path: "; std::cin >> out;
+std::cout << "write memory(mb): "; std::cin >> memory_size;
+std::chrono::time_point<std::chrono::system_clock> start, end;
+start = std::chrono::system_clock::now();
+sorting(in, out, memory_size);
+end = std::chrono::system_clock::now();
+int elapsed_seconds = std::chrono::duration_cast<std::chrono::seconds>
+(end - start).count();
+std::time_t end_time = std::chrono::system_clock::to_time_t(end);
+std::cout << "finished computation at " << std::ctime(&end_time) << "elapsed time: " << elapsed_seconds << "s\n";
+system("pause");
 }
-
-auto File_sort::make_file(std::string name_file, std::vector<Data> &arr) -> void {
-    std::ofstream file(name_file);
-    if (!file) {
-        std::logic_error("Error: file not open");
-    }
-    for (int i = 0; i < arr.size(); ++i) {
-        file << arr[i] << std::endl;
-    }
-    file.close();
-}
-
-auto File_sort::generate() -> void {
-    std::ifstream file(name_input_file);
-
-    unsigned long size = 0;
-    std::string name_file = "0";
-    Data data;
-    std::vector<Data> arr(buffer_size / 24);
-    arr.clear();
-
-    while (file >> data) {
-        arr.push_back(data);
-        ++size;
-        if (buffer_size / 24 <= size) {
-            arr_name_file.push_back(name_file);
-            std::sort(arr.begin(), arr.end());
-            make_file(name_file, arr);
-            name_file = arr_name_file.size();
-            size = 0;
-            arr.clear();
-        }
-    }
-    if (arr.size() > 0) {
-        std::sort(arr.begin(), arr.end());
-        arr_name_file.push_back("end.txt");
-        make_file("end.txt", arr);
-    }
-    file.close();
-}
-
-
-auto File_sort::sort() -> void {
-    std::priority_queue<A> other;
-    for (int i = 0; i < arr_name_file.size(); ++i) {
-        A tmp = {new std::ifstream(arr_name_file[i])};
-        *tmp.ptr >> tmp.data;
-        other.push(tmp);
-    }
-    std::ofstream tmp(name_output_file);
-    std::string word;
-    while (!other.empty()) {
-        A tmp1 = other.top();
-        tmp << tmp1.data << std::endl;
-        other.pop();
-        if (!tmp1.ptr->eof() && *tmp1.ptr >> tmp1.data) {
-            other.push(tmp1);
-        } else {
-            tmp1.ptr->close();
-        }
-    }
-    remove_create_files();
-}
-
-auto File_sort::remove_create_files() -> void {
-    for (int i = 0; i < arr_name_file.size(); ++i) {
-        auto a = arr_name_file[i].c_str();
-        std::remove(a);
-    }
-}
-#endif
+*/
