@@ -15,7 +15,7 @@ SCENARIO("8mb", "[8mb]")
   sorting("8mb","8out_8",1);
   bool x = true;
   std::ifstream f1("out_8"), f2("out8");
-  Data s1, s2;
+  line s1, s2;
   while(!f2.eof() && !f1.eof())
   {
     if((f1>>s1)&&(f2>>s2))
